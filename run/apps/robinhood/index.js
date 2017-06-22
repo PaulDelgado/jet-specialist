@@ -13,13 +13,12 @@ app.launch(function(req, res) {
 app.intent('AMAZON.StopIntent', {
   'utterances': ['{stop|cancel|exit}']
   },
-  function(req, res) {
-    res.type = 'SessionEndedRequest';
-    res.send('Goodbye').shouldEndSession(true);
+  function(req, res, type) {
+    type = 'SessionEndedRequest';
+    res.say('Robin Hood closed.').shouldEndSession(true).send();
     return true;
   }
 );
-
 
 app.intent('quoteInfo', {
   'slots': {
