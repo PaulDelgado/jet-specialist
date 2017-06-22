@@ -104,8 +104,8 @@ RHDataHelper.prototype.formatQuote = function(quoteInfo) {
   // First we handle some special conditions
   if (quoteInfo.trading_halted === 'true') {
     // Trading is halted as of the time quote was retrieved
-    var template = _.template('<say-as interpret-as="interjection">Attention!</say-as> There is a trading halt on ${symbol}. ${basic}');
-    return template({
+    //var template = _.template('<say-as interpret-as="interjection">Attention!</say-as> There is a trading halt on ${symbol}. ${basic}');
+    return _.template('<say-as interpret-as="interjection">Attention!</say-as> There is a trading halt on ${symbol}. ${basic}')({
       symbol: quoteInfo.symbol,
       basic: basic
     });
@@ -115,8 +115,8 @@ RHDataHelper.prototype.formatQuote = function(quoteInfo) {
       symbol: quoteInfo.symbol,
       basic: basic
     });
-  // Our "normal" response
   } else {
+    // Our basic quote response
     return _.template('${basic}')({
       basic: basic
     });
