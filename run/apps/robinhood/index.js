@@ -10,21 +10,24 @@ app.launch(function(req, res) {
   res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
-// Check for an exit or cancel request
-app.cancel(function(req, res, type) {
-  if (type === 'SessionEndedRequest') {
-    res.send('').shouldEndSession(true);
+app.intent('AMAZON.StopIntent', {
+  'utterances': ['{stop|cancel|exit}']
+  },
+  function(req, res) {
+    res.type = 'SessionEndedRequest';
+    res.send('Goodbye').shouldEndSession(true);
     return true;
   }
-});
+);
+
 
 app.intent('quoteInfo', {
   'slots': {
     'SYMBOL': 'SYMBOLS'
   },
   'utterances': ['{quote} {|for|on} {|ticker|symbol} {-|SYMBOL}']
-},
-  function(req, res, type) {
+  },
+  function(req, res) {
     // Get the slot
     var symbol = req.slot('SYMBOL');
     // Set a reprompt value
@@ -32,10 +35,6 @@ app.intent('quoteInfo', {
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol. Tell me which ticker symbol you\'d like me to quote for you.';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
-      return true;
-    } else if (symbol === 'stop' || symbol === 'cancel' || symbol === 'exit') {
-      type = 'SessionEndedRequest';
-      res.say('Goodbye.').shouldEndSession(true);
       return true;
     } else {
       // console.log("RESPONSE PROPERTIES\n---");
@@ -62,7 +61,7 @@ app.intent('detailInfo', {
     'SYMBOL': 'SYMBOLS'
   },
   'utterances': ['{detail|info} {|for|on} {|ticker|symbol} {-|SYMBOL}']
-},
+  },
   function(req, res) {
     //get the slot
     var symbol = req.slot('SYMBOL');
