@@ -41,7 +41,7 @@ app.intent('quoteInfo', {
     // Get the slot
     var symbol = req.slot('SYMBOL');
     // Set a reprompt value
-    var reprompt = 'Tell me the symbol of a tradeable instrument to get quote data.';
+    var reprompt = 'Say quote, then spell the symbol for a tradeable financial instrument to get a live quote.';
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol.';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
@@ -75,7 +75,7 @@ app.intent('detailInfo', {
   function(req, res) {
     //get the slot
     var symbol = req.slot('SYMBOL');
-    var reprompt = 'Spell the symbol for a tradeable financial instrument to get detailed information.';
+    var reprompt = 'Say detail, then spell the symbol for a tradeable financial instrument to get detailed information.';
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol.';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
