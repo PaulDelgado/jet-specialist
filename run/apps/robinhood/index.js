@@ -24,7 +24,7 @@ app.intent('quoteInfo', {
   },
   'utterances': ['{quote} {|for|on} {|ticker|symbol} {-|SYMBOL}']
 },
-  function(req, res) {
+  function(req, res, type) {
     // Get the slot
     var symbol = req.slot('SYMBOL');
     // Set a reprompt value
@@ -32,6 +32,10 @@ app.intent('quoteInfo', {
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol. Tell me which ticker symbol you\'d like me to quote for you.';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
+      return true;
+    } else if (symbol === 'stop' || 'cancel' || 'exit') {
+      type = 'SessionEndedRequest';
+      res.send('Goodbye.').shouldEndSession(true);
       return true;
     } else {
       // console.log("RESPONSE PROPERTIES\n---");
