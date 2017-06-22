@@ -8,25 +8,42 @@ var ENDPOINT = 'https://api.robinhood.com/';
 function RHDataHelper() {
 }
 
-// Log raw response data
+// Log & validate quote response
 RHDataHelper.prototype.requestQuote = function(symbol) {
   return this.getQuote(symbol).then(
     function(response) {
       console.log('success - received quote info for ' + symbol);
       return response.body;
-    }
-  );
+    }).catch(function(err) {
+      console.error("Error: " + err.stack);
+      return _.template('Sorry, Robin Hood couldn\'t find data for ticker symbol ' +
+                        '<say-as interpret-as="spell-out">' + symbol + '</say-as>.');
+    });
 };
 
 // Get basic quote data
 RHDataHelper.prototype.getQuote = function(symbol) {
   var options = {
     method: 'GET',
-    uri: ENDPOINT + 'quotes/' + symbol + '/',
+    uri: ENDPOINT + 'quotes/' + symbol.toUpperCase().replace(/\s+/g, '') + '/',
     resolveWithFullResponse: true,
     json: true
   };
+  console.log('Quote URI: ' + options.uri);
   return rp(options);
+};
+
+// Log & validate response
+RHDataHelper.prototype.requestInstrument = function(symbol) {
+  return this.getQuote(symbol).then(
+    function(response) {
+      console.log('success - received quote info for ' + symbol);
+      return response.body;
+    }).catch(function(err) {
+      console.error("Error: " + err.stack);
+      return _.template('Sorry, Robin Hood couldn\'t find data for ticker symbol ' +
+                        '<say-as interpret-as="spell-out">' + symbol + '</say-as>.');
+    });
 };
 
 // Get detailed instrument data
@@ -89,18 +106,21 @@ RHDataHelper.prototype.formatQuote = function(quoteInfo) {
   var instrument = quoteInfo.instrument.split("/");
   var instrument_id = instrument[4];
   // Build the speech template to return basic info by default
-  var basic = _.template('<say-as interpret-as="interjection"><prosody volume="x-loud">Yo!</prosody></say-as> ' +
-                'The last price traded for <say-as interpret-as="spell-out">${symbol}</say-as> is $${last_trade_price}, ' +
-                'updated as of <say-as interpret-as="date" format="ymd">${date}</say-as>, ' +
-                '<say-as interpret-as="time">${time}</say-as>, ' +
-                '<say-as interpret-as="spell-out">${timezone}</say-as>.')({
-    symbol: quoteInfo.symbol,
-    last_trade_price: quoteInfo.last_trade_price,
-    date: date[0],
-    time: date[1],
-    timezone: date[2],
-    instrument: instrument_id,
-  });
+  var basic = _.template(
+    'The last price traded in the open session for <say-as interpret-as="spell-out">${symbol}</say-as> ' +
+    'is $${last_trade_price}, ' +
+    'updated as of <say-as interpret-as="date" format="ymd">${date}</say-as>, ' +
+    '<say-as interpret-as="time">${time}</say-as>, ' +
+    '<say-as interpret-as="spell-out">${timezone}</say-as>.')(
+    {
+      symbol: quoteInfo.symbol,
+      last_trade_price: quoteInfo.last_trade_price,
+      date: date[0],
+      time: date[1],
+      timezone: date[2],
+      instrument: instrument_id,
+    }
+  );
   // First we handle some special conditions
   if (quoteInfo.trading_halted === 'true') {
     // Trading is halted as of the time quote was retrieved
