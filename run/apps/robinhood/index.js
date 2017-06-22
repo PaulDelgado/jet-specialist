@@ -13,9 +13,20 @@ app.launch(function(req, res) {
 app.intent('AMAZON.StopIntent', {
   'utterances': ['{stop|cancel|exit}']
   },
-  function(req, res, type) {
-    type = 'SessionEndedRequest';
+  function(req, res) {
     res.say('Robin Hood closed.').shouldEndSession(true).send();
+    return true;
+  }
+);
+
+app.intent('AMAZON.HelpIntent', {
+  'utterances': ['{help} {|me} {|get a quote|get company details}']
+  },
+  function(req, res) {
+    res.say('This skill integrates me with the Robinhood <say-as interpret-as="spell-out">API</say-as> ' +
+            'to give you real-time quotes, company details, and other market data. ' +
+            'Try asking me for a quote or detail on a ticker symbol spelled out. ' +
+            'Otherwise, say stop or cancel to close Robin Hood.').shouldEndSession(false).send();
     return true;
   }
 );
@@ -32,8 +43,8 @@ app.intent('quoteInfo', {
     // Set a reprompt value
     var reprompt = 'Tell me the symbol of a tradeable instrument to get quote data.';
     if (_.isEmpty(symbol)) {
-      var prompt = 'I didn\'t hear a ticker symbol. Tell me which ticker symbol you\'d like me to quote for you.';
-      res.say(prompt).reprompt(reprompt).shouldEndSession(false);
+      var prompt = 'I didn\'t hear a ticker symbol.';
+      res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
       return true;
     } else {
       // console.log("RESPONSE PROPERTIES\n---");
@@ -47,8 +58,8 @@ app.intent('quoteInfo', {
       }).catch(function(err) {
         console.error("Error: " + err.stack);
         //console.log(Object.getOwnPropertyNames(err));
-        var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
-        res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
+        var response = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
+        res.say(response).shouldEndSession(true).send();
       });
       return false;
     }
@@ -67,7 +78,7 @@ app.intent('detailInfo', {
     var reprompt = 'Spell the symbol for a tradeable financial instrument to get detailed information.';
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol.';
-      res.say(prompt).reprompt(reprompt).shouldEndSession(false);
+      res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
       return true;
     } else {
       // console.log("RESPONSE PROPERTIES\n---");
