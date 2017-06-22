@@ -77,7 +77,7 @@ RHDataHelper.prototype.formatQuoteCard = function(quoteInfo) {
 RHDataHelper.prototype.formatQuote = function(quoteInfo) {
   // Preparations using Moment to ease use of natural language abilities around the Date object
   // Robinhood returns UTC timestamps by default
-  var utc = moment.tz(quoteInfo.updated_at, 'UTC').format();
+  var utc = moment.tz(quoteInfo.updated_at, 'UTC').format("YYYY-MM-DD h:mma z");
   console.log('UTC: ' + utc);
   // Convert UTC to Eastern time
   var est = moment.tz(quoteInfo.updated_at, 'America/New_York').format("YYYY-MM-DD h:mma z");

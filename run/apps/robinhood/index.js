@@ -16,10 +16,16 @@ app.intent('quoteInfo', {
   },
   'utterances': ['{quote} {|for|on} {|ticker|symbol} {-|SYMBOL}']
 },
-  function(req, res) {
-    //get the slot
+  function(req, res, type) {
+    // Get the slot
     var symbol = req.slot('SYMBOL');
-    var reprompt = 'Tell me a tradeable instrument to get quote data.';
+    // Set a reprompt value
+    var reprompt = 'Tell me the symbol of a tradeable instrument to get quote data.';
+    // Check for an exit or cancel request
+    if (type === 'SessionEndedRequest') {
+      res.send('').shouldEndSession(true);
+      return true;
+    }
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol. Tell me which ticker symbol you\'d like me to quote for you.';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
