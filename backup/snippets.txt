@@ -1,0 +1,20 @@
+/*
+rhHelper.requestQuote(symbol).then(function(detailInfo) {
+  console.log("detailInfo Instrument: " + detailInfo.instrument);
+  var instrument = detailInfo.instrument.split("/");
+  console.log("Instrument ID: " + instrument[4]);
+  rhHelper.getInstrument(instrument[4]).then(function(detailInfo) {
+    console.log(detailInfo.body);
+    console.log("---");
+    //rhHelper.getFundamentals(detailInfo.body.symbol).then(function(fundamentalInfo) {
+      res.card(rhHelper.formatDetailCard(detailInfo.body));
+      res.say(rhHelper.formatDetail(detailInfo.body)).send();
+    //});
+  }).catch(function(err) {
+    console.error("Error: " + err.stack);
+    var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
+    res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
+  });
+});
+return false;
+*/
