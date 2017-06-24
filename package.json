@@ -17,6 +17,7 @@
     "lodash": "^4.3.0",
     "request-promise": "^2.0.0",
     "moment": "^2.18.1",
-    "moment-timezone": "^0.5.13"
+    "moment-timezone": "^0.5.13",
+    "alexa-verifier-middleware": "^0.2.2"
   }
 }

@@ -5,6 +5,7 @@ var http = require('http');
 var https = require('https');
 var express = require('express');
 var alexa = require('alexa-app');
+var verifier = require('alexa-verifier-middleware');
 var bodyParser = require('body-parser');
 var Promise = require('bluebird');
 
@@ -137,6 +138,7 @@ var appServer = function(config) {
 	self.start = function() {
 		// Instantiate up the server
 		self.express = express();
+    self.express.use(verifier);
 		self.express.use(bodyParser.urlencoded({ extended: true }));
 		self.express.use(bodyParser.json());
 		self.express.set('views', path.join(__dirname,'views'));
