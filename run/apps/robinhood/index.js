@@ -6,12 +6,12 @@ var app = new Alexa.app('robinhood');
 var RHDataHelper = require('./rh_data_helper');
 
 app.launch(function(req, res) {
-  var prompt = 'For a quote, tell me a ticker symbol.';
+  var prompt = 'Say either quote or detail, then spell a ticker symbol.';
   res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
 app.intent('AMAZON.StopIntent', {
-  'utterances': ['{stop|cancel|exit}']
+  'utterances': ['{stop|cancel}']
   },
   function(req, res) {
     res.say('Robin Hood closed.').shouldEndSession(true).send();
@@ -40,6 +40,7 @@ app.intent('quoteInfo', {
   function(req, res) {
     // Get the slot
     var symbol = req.slot('SYMBOL');
+    console.log('intent.detailInfo().symbol: ' + symbol);
     // Set a reprompt value
     var reprompt = 'Say quote, then spell the symbol for a tradeable financial instrument to get a live quote.';
     if (_.isEmpty(symbol)) {
@@ -57,7 +58,6 @@ app.intent('quoteInfo', {
         res.say(rhHelper.formatQuote(quoteInfo)).send();
       }).catch(function(err) {
         console.error("Error: " + err.stack);
-        //console.log(Object.getOwnPropertyNames(err));
         var response = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
         res.say(response).shouldEndSession(true).send();
       });
@@ -73,8 +73,10 @@ app.intent('detailInfo', {
   'utterances': ['{detail|info} {|for|on} {|ticker|symbol} {-|SYMBOL}']
   },
   function(req, res) {
-    //get the slot
+    // Get the slot
     var symbol = req.slot('SYMBOL');
+    console.log('intent.detailInfo().symbol: ' + symbol);
+    // Set a reprompt value
     var reprompt = 'Say detail, then spell the symbol for a tradeable financial instrument to get detailed information.';
     if (_.isEmpty(symbol)) {
       var prompt = 'I didn\'t hear a ticker symbol.';
@@ -84,23 +86,15 @@ app.intent('detailInfo', {
       // console.log("RESPONSE PROPERTIES\n---");
       // console.log(Object.getOwnPropertyNames(res));
       var rhHelper = new RHDataHelper();
-      rhHelper.requestQuote(symbol).then(function(detailInfo) {
-        console.log("detailInfo Instrument: " + detailInfo.instrument);
-        var instrument = detailInfo.instrument.split("/");
-        console.log("Instrument ID: " + instrument[4]);
-        rhHelper.getInstrument(instrument[4]).then(function(detailInfo) {
-          console.log(detailInfo.body);
-          console.log("---");
-          //rhHelper.getFundamentals(detailInfo.body.symbol).then(function(fundamentalInfo) {
-            res.card(rhHelper.formatDetailCard(detailInfo.body));
-            res.say(rhHelper.formatDetail(detailInfo.body)).send();
-          //});
-        }).catch(function(err) {
-          console.error("Error: " + err.stack);
-          //console.log(Object.getOwnPropertyNames(err));
-          var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
-          res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
-        });
+      rhHelper.requestInstrument(symbol).then(function(detailInfo) {
+        console.log(detailInfo);
+        console.log("---");
+        res.card(rhHelper.formatDetailCard(detailInfo));
+        res.say(rhHelper.formatDetail(detailInfo)).send();
+      }).catch(function(err) {
+        console.error("Error: " + err.stack);
+        var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
+        res.say(prompt).reprompt(reprompt).shouldEndSession(false).send();
       });
       return false;
     }

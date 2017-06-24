@@ -10,15 +10,20 @@ function RHDataHelper() {
 
 // Log & validate quote response
 RHDataHelper.prototype.requestQuote = function(symbol) {
-  return this.getQuote(symbol).then(
-    function(response) {
-      console.log('success - received quote info for ' + symbol);
-      return response.body;
-    }).catch(function(err) {
-      console.error("Error: " + err.stack);
-      return _.template('Sorry, Robin Hood couldn\'t find data for ticker symbol ' +
-                        '<say-as interpret-as="spell-out">' + symbol + '</say-as>.');
-    });
+  return this.getQuote(symbol).then(function(response) {
+    console.log('requestQuote().getQuote().response \n.statusCode: ' + 
+                response.statusCode);
+    console.log('.statusMessage: ' + 
+                response.statusMessage);
+    console.log('.body.getOwnPropertyNames: ' + 
+                Object.getOwnPropertyNames(response.body));
+    console.log('success - received quote info for ' + symbol);
+    return response.body;
+  }).catch(function(err) {
+    console.error("Error: " + err.stack);
+    return _.template('Sorry, Robin Hood couldn\'t find data for ticker symbol ' +
+                      '<say-as interpret-as="spell-out">' + symbol + '</say-as>.');
+  });
 };
 
 // Get basic quote data
@@ -29,21 +34,43 @@ RHDataHelper.prototype.getQuote = function(symbol) {
     resolveWithFullResponse: true,
     json: true
   };
-  console.log('Quote URI: ' + options.uri);
+  console.log('getQuote().options.uri: ' + options.uri);
   return rp(options);
 };
 
-// Log & validate response
+// Log & validate instrument response
 RHDataHelper.prototype.requestInstrument = function(symbol) {
-  return this.getQuote(symbol).then(
-    function(response) {
-      console.log('success - received quote info for ' + symbol);
+  return this.findInstrument(symbol).then(function(instrument) {
+    return RHDataHelper.prototype.getInstrument(instrument).then(function(response) {
+      console.log('requestInstrument().findInstrument().getInstrument().response \n.statusCode: ' + 
+                  response.statusCode);
+      console.log('.statusMessage: ' + 
+                  response.statusMessage);
+      console.log('.body.getOwnPropertyNames: ' + 
+                  Object.getOwnPropertyNames(response.body));
+      console.log('success - received Instrument Detail for ' + response.body.id);
       return response.body;
     }).catch(function(err) {
-      console.error("Error: " + err.stack);
-      return _.template('Sorry, Robin Hood couldn\'t find data for ticker symbol ' +
-                        '<say-as interpret-as="spell-out">' + symbol + '</say-as>.');
+      console.log("Error in requestInstrument().findInstrument().getInstrument(): " + err.stack);
     });
+  });
+};
+
+// Find instrument ID given a ticker symbol
+RHDataHelper.prototype.findInstrument = function(symbol) {
+  var instrument = '';
+  return this.getQuote(symbol).then(function(response) {
+    console.log('findInstrument().getQuote().response \n.statusCode: ' + 
+                response.statusCode);
+    console.log('.statusMessage: ' + 
+                response.statusMessage);
+    console.log('.body.getOwnPropertyNames: ' + 
+                Object.getOwnPropertyNames(response.body));
+    var instrument_array = response.body.instrument.split("/");
+    instrument = instrument_array[4];
+    console.log("success - received Instrument ID: " + instrument);
+    return instrument;
+  }); 
 };
 
 // Get detailed instrument data
@@ -54,6 +81,7 @@ RHDataHelper.prototype.getInstrument = function(instrument) {
     resolveWithFullResponse: true,
     json: true
   };
+  console.log('getInstrument().options.uri: ' + options.uri);
   return rp(options);
 };
 
@@ -61,10 +89,11 @@ RHDataHelper.prototype.getInstrument = function(instrument) {
 RHDataHelper.prototype.getFundamentals = function(symbol) {
   var options = {
     method: 'GET',
-    uri: ENDPOINT + 'fundamentals/' + symbol + '/',
+    uri: ENDPOINT + 'fundamentals/' + symbol.toUpperCase().replace(/\s+/g, '') + '/',
     resolveWithFullResponse: true,
     json: true
   };
+  console.log('Fundamentals URI: ' + options.uri);
   return rp(options);
 };
 
@@ -86,7 +115,7 @@ RHDataHelper.prototype.formatQuoteCard = function(quoteInfo) {
         "largeImageUrl": "https://cdn01.vulcanpost.com/wp-uploads/2017/04/141016-stockmarket-stock.jpg"
       }
   });
-  console.log("Card built: " + Object.getOwnPropertyNames(card));
+  console.log("Quote Card built: " + Object.getOwnPropertyNames(card));
   return card;
 };
 
@@ -124,7 +153,6 @@ RHDataHelper.prototype.formatQuote = function(quoteInfo) {
   // First we handle some special conditions
   if (quoteInfo.trading_halted === 'true') {
     // Trading is halted as of the time quote was retrieved
-    //var template = _.template('<say-as interpret-as="interjection">Attention!</say-as> There is a trading halt on ${symbol}. ${basic}');
     return _.template('<say-as interpret-as="interjection">Attention!</say-as> There is a trading halt on ${symbol}. ${basic}')({
       symbol: quoteInfo.symbol,
       basic: basic
@@ -159,14 +187,15 @@ RHDataHelper.prototype.formatDetailCard = function(detailInfo) {
         "largeImageUrl": "https://cdn01.vulcanpost.com/wp-uploads/2017/04/141016-stockmarket-stock.jpg"
       }
   });
-  console.log("Card built: " + Object.getOwnPropertyNames(card));
+  console.log("Detail Card built: " + Object.getOwnPropertyNames(card));
   return card;  
 };
 
 // Format detailed info response
 RHDataHelper.prototype.formatDetail = function(detailInfo) {
+  console.log("CHECK - formatDetail().detailInfo: " + Object.getOwnPropertyNames(detailInfo));
   var tradeable = detailInfo.tradeable;
-  if (tradeable === true) { tradeable = "tradeable"; } else { tradeable = "not tradeable"; }
+  (tradeable === true) ? tradeable = "tradeable" : tradeable = "not tradeable";
   console.log("Tradeable: " + tradeable);
   // Build the speech template to return basic info by default
   var basic = _.template('<say-as interpret-as="interjection"><prosody volume="x-loud">Lookup successful!</prosody></say-as> ' +
