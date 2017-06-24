@@ -8,6 +8,7 @@ Robinhood integration with Alexa. Delivered as a Skill you find in Amazon's libr
 package | note
 --- | ---
 [alexa-app-server](https://github.com/bignerdranch/alexa-airportinfo) | Simple server and JSON request/response handling.
+[alexa-verifier-middleware](https://github.com/alexa-js/alexa-verifier-middleware/) | Request verification.
 [lodash](https://github.com/lodash/lodash) | Facilitates construction & iteration of objects, arrays, etc.
 [request-promise](https://github.com/request/request-promise) | Simple HTTP client.
 [moment](https://github.com/moment/moment) | Date-time utilities.
