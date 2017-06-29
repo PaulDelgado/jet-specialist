@@ -58,7 +58,7 @@ app.intent('quoteInfo', {
         res.say(rhHelper.formatQuote(quoteInfo)).send();
       }).catch(function(err) {
         console.error("Error: " + err.stack);
-        var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
+        var prompt = 'Sorry, <say-as interpret-as="spell-out">' + symbol + '</say-as> doesn\'t appear to be a valid symbol, so no data could be found for it.';
         res.say(prompt).shouldEndSession(true).send();
       });
       return false;
@@ -93,7 +93,7 @@ app.intent('detailInfo', {
         res.say(rhHelper.formatDetail(detailInfo)).send();
       }).catch(function(err) {
         console.error("Error: " + err.stack);
-        var prompt = 'Sorry, I couldn\'t find data for ticker symbol <say-as interpret-as="spell-out">' + symbol + '</say-as>.';
+        var prompt = 'Sorry, <say-as interpret-as="spell-out">' + symbol + '</say-as> doesn\'t appear to be a valid symbol, so no data could be found for it.';
         res.say(prompt).shouldEndSession(true).send();
       });
       return false;
